@@ -1,0 +1,5 @@
+# pgsyswatch.control
+comment = 'System process monitor extension for PostgreSQL'
+default_version = '1.0'
+relocatable = true
+module_pathname = '$libdir/pgsyswatch'
