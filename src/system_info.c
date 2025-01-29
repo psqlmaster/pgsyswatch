@@ -1,4 +1,6 @@
 // src/system_info.c
+// SPDX-License-Identifier: Apache-2.0
+// Copyright 2025 Alexander Scheglov
 #include "postgres.h"
 #include "fmgr.h"
 #include "utils/elog.h"

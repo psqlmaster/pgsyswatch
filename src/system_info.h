@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright 2025 Alexander Scheglov
 #ifndef SYSTEM_INFO_H
 #define SYSTEM_INFO_H
 

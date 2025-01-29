@@ -1,4 +1,6 @@
 #!/bin/bash
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2025 Alexander Scheglov
 
 # Parameters
 DB_NAME="testdb"  # Default database name

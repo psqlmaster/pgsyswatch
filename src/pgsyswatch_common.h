@@ -1,4 +1,6 @@
 // pgsyswatch_common.h
+// SPDX-License-Identifier: Apache-2.0
+// Copyright 2025 Alexander Scheglov
 #ifndef PGSYSWATCH_COMMON_H
 #define PGSYSWATCH_COMMON_H
 

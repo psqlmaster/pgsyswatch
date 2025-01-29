@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright 2025 Alexander Scheglov
 #include "pgsyswatch_common.h"
 
 // Function to calculate CPU usage percentage

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2025 Alexander Scheglov
 # Variables
 EXTENSION = pgsyswatch
 DATA = sql/pgsyswatch--1.0.sql
