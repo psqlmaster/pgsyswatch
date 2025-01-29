@@ -15,6 +15,8 @@
 
 ---
 
+#### Preview
+<img src="example.gif" width=1000 />
 
 ### Installation 🚀
 

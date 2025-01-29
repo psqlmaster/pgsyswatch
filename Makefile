@@ -22,11 +22,13 @@ pgsyswatch.so: $(OBJS)
 	$(CC) $(CFLAGS) $(PG_CPPFLAGS) -c $< -o $@
 # Installation
 install: all
+	sudo systemctl stop postgresql-custom
 	sudo cp $(LIBS) /usr/local/pgsql/lib/
 	sudo cp $(DATA) /usr/local/pgsql/share/extension/
 	sudo cp pgsyswatch.control /usr/local/pgsql/share/extension/
 	sudo chown postgres:postgres /usr/local/pgsql/lib/*.so
 	sudo chown postgres:postgres /usr/local/pgsql/share/extension/*
+	sudo systemctl start postgresql-custom
 # Clean
 clean:
 	rm -f src/*.o $(LIBS)
@@ -42,11 +44,9 @@ pgstart:
 # Testing (optional)
 .PHONY: test
 test:
-	@echo "Please wait 60 seconds while restart postgresql &  the extension is being installed..."
-	sudo systemctl restart postgresql-custom
-	sleep 60
+	@echo "Please wait 2 seconds while start postgresql..."
+	sleep 2 # if an error has been detected, add seconds.
 	psql -U $(DB_USER) -h $(PGHOST) -p $(PGPORT) -d $(DB_NAME) -c "drop extension if exists pgsyswatch cascade;"
-	sleep 3
 	psql -U $(DB_USER) -h $(PGHOST) -p $(PGPORT) -d $(DB_NAME) -c "create extension pgsyswatch;"
 	psql -U $(DB_USER) -h $(PGHOST) -p $(PGPORT) -d $(DB_NAME) -c "SELECT * FROM pgsyswatch.proc_activity_snapshots;"
 	psql -U $(DB_USER) -h $(PGHOST) -p $(PGPORT) -d $(DB_NAME) -c "SELECT * FROM pgsyswatch.pg_proc_activity;"
