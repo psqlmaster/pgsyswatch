@@ -93,23 +93,22 @@
 \x on
 select * from pgsyswatch.proc_monitor_all();
 ```
-|Parameters                  | Value          |
-|----------------------------|----------------|
-| pid                        | 1              |
-| res_mb                     | 12.691406      |
-| virt_mb                    | 164.53125      |
-| swap_mb                    | 0              |
-| command                    | /sbin/init     |
-| state                      | S              |
-| utime                      | 92             |
-| stime                      | 97             |
-| cpu_usage                  | 0.006027958    |
-| read_bytes                 | 0              |
-| write_bytes                | 0              |
-| voluntary_ctxt_switches    | 3303           |
-| nonvoluntary_ctxt_switches | 379            |
-| threads                    | 1              |
-
+| Parameter | Value | Description |
+|-----------|-------|-------------|
+| pid | 1 | Process ID |
+| res_mb | 12.691406 | Resident memory usage in MB |
+| virt_mb | 164.53125 | Virtual memory usage in MB |
+| swap_mb | 0 | Swap usage in MB |
+| command | /sbin/init | Command that started the process |
+| state | S | Process state (single letter: R, S, D, Z, etc.) |
+| utime | 92 | Time spent in user mode |
+| stime | 97 | Time spent in system mode |
+| cpu_usage | 0.006027958 | CPU usage percentage |
+| read_bytes | 0 | Number of bytes read from disk |
+| write_bytes | 0 | Number of bytes written to disk |
+| voluntary_ctxt_switches | 3303 | Number of voluntary context switches |
+| nonvoluntary_ctxt_switches | 379 | Number of involuntary context switches |
+| threads | 1 | Number of threads |
 - **`system_swap_info()`** 🔄: Returns information about system swap usage.
 - **`pg_loadavg()`** 📊: Provides system load average data. (Realtime)
 ```sql
