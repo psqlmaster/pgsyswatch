@@ -1,86 +1,86 @@
 -- pgsyswatch--1.0.sql
--- Копируем расширение в /usr/local/pgsql/lib/pgsyswatch
--- Создаем схему для расширения
+-- Copying the extension to /usr/local/pgsql/lib/pgsyswatch
+-- Creating a schema for the extension
 DROP SCHEMA IF EXISTS pgsyswatch CASCADE;
--- Создаем схему для расширения (если она еще не создана)
+-- Creating a schema for the extension (if it has not been created yet)
 CREATE SCHEMA IF NOT EXISTS pgsyswatch;
 
--- Устанавливаем схему по умолчанию для текущего сеанса
+-- Setting the default schema for the current session
 SET search_path TO pgsyswatch;
 
--- Создаем тип для возвращаемых данных о процессах
+-- Creating a type for returned process monitoring data
 CREATE TYPE pgsyswatch.proc_monitor_type AS (
     pid INTEGER,
-    res_mb FLOAT4,  -- Память (VmRSS)
-    virt_mb FLOAT4, -- Виртуальная память (VmSize)
-    swap_mb FLOAT4, -- Своп (VmSwap)
+    res_mb FLOAT4,  -- Memory (VmRSS)
+    virt_mb FLOAT4, -- Virtual memory (VmSize)
+    swap_mb FLOAT4, -- Swap (VmSwap)
     command TEXT, -- cmd
-    state TEXT, -- Состояние процесса
-    utime BIGINT,   -- Время в пользовательском режиме (тики)
-    stime BIGINT,   -- Время в системном режиме (тики)
-    cpu_usage FLOAT4, -- Процент использования CPU
-    read_bytes BIGINT, -- Количество прочитанных байт с диска
-    write_bytes BIGINT, -- Количество записанных байт на диск
-    voluntary_ctxt_switches INT4, -- Добровольные переключения контекста
-    nonvoluntary_ctxt_switches INT4, -- Принудительные переключения контекста
-    threads INT4 -- Количество потоков
+    state TEXT, -- Process state
+    utime BIGINT,   -- User mode time (ticks)
+    stime BIGINT,   -- System mode time (ticks)
+    cpu_usage FLOAT4, -- CPU usage percentage
+    read_bytes BIGINT, -- Number of bytes read from disk
+    write_bytes BIGINT, -- Number of bytes written to disk
+    voluntary_ctxt_switches INT4, -- Voluntary context switches
+    nonvoluntary_ctxt_switches INT4, -- Involuntary context switches
+    threads INT4 -- Number of threads
 );
 
--- Создаем тип для возвращаемых данных о системе (swap)
+-- Creating a type for returned system swap data
 CREATE TYPE system_info_type AS (
     total_swap_mb FLOAT4,
     used_swap_mb FLOAT4,
     free_swap_mb FLOAT4
 );
 
--- Создаем функцию для получения информации о swap
+-- Creating a function to retrieve swap information
 CREATE FUNCTION system_swap_info()
 RETURNS system_info_type
 LANGUAGE c
 AS '/usr/local/pgsql/lib/pgsyswatch', 'system_info';
 
--- Создаем тип для возвращаемых данных о средней нагрузке системы
+-- Creating a type for returned system load average data
 CREATE TYPE loadavg_type AS (
-    load1 FLOAT4,            -- Средняя нагрузка за 1 минуту
-    load5 FLOAT4,            -- Средняя нагрузка за 5 минут
-    load15 FLOAT4,           -- Средняя нагрузка за 15 минут
-    running_processes INT4,  -- Количество выполняющихся процессов
-    total_processes INT4,    -- Общее количество процессов
-    last_pid INT4,           -- Последний PID
-    cpu_cores INT4           -- Количество ядер CPU
+    load1 FLOAT4,            -- Load average over 1 minute
+    load5 FLOAT4,            -- Load average over 5 minutes
+    load15 FLOAT4,           -- Load average over 15 minutes
+    running_processes INT4,  -- Number of running processes
+    total_processes INT4,    -- Total number of processes
+    last_pid INT4,           -- Last PID
+    cpu_cores INT4           -- Number of CPU cores
 );
 
--- Создаем тип для возвращаемых данных о частоте процессора
+-- Creating a type for returned CPU frequency data
 CREATE TYPE cpu_frequency_type AS (
     core_id int,
     frequency_mhz FLOAT4
 );
 
--- Создаем функцию для получения информации о частоте процессора
+-- Creating a function to retrieve CPU frequency information
 CREATE FUNCTION cpu_frequencies()
 RETURNS SETOF cpu_frequency_type
 LANGUAGE c
 AS '/usr/local/pgsql/lib/pgsyswatch', 'cpu_frequencies';
 
--- Создаем функцию для получения средней нагрузки системы
+-- Creating a function to retrieve system load average
 CREATE FUNCTION pg_loadavg()
 RETURNS loadavg_type
 LANGUAGE c
 AS '/usr/local/pgsql/lib/pgsyswatch', 'pg_loadavg';
 
--- Создаем функцию для мониторинга процессов по PID
+-- Creating a function for monitoring processes by PID
 CREATE FUNCTION proc_monitor(IN pid INTEGER)
 RETURNS proc_monitor_type
 LANGUAGE c
 AS '/usr/local/pgsql/lib/pgsyswatch', 'proc_monitor';
 
--- Создаем функцию для мониторинга всех процессов
+-- Creating a function for monitoring all processes
 CREATE FUNCTION proc_monitor_all()
 RETURNS SETOF proc_monitor_type
 LANGUAGE c
 AS '/usr/local/pgsql/lib/pgsyswatch', 'proc_monitor_all';
 
--- Создаем VIEW для отображения информации о процессах
+-- Creating a VIEW to display process information
 CREATE OR REPLACE VIEW pg_stat_activity_ext AS
 SELECT 
     p.pid, 
@@ -109,7 +109,7 @@ LEFT JOIN LATERAL (
 ) p ON true
 WHERE 
     a.pid IS NOT NULL;
--- Создаем VIEW для отображения информации обо всех процессах
+-- Creating a VIEW to display information about all processes
 CREATE OR REPLACE VIEW pg_proc_activity AS
 select
 	p.pid,
@@ -136,7 +136,7 @@ from
 right join pgsyswatch.proc_monitor_all() p
 		using(pid);   
 
--- Создаем VIEW для отображения информации о всех процессах в системе
+-- Creating a VIEW to display information about all system processes
 CREATE VIEW pg_all_processes AS
 SELECT 
     p.pid, 
@@ -156,20 +156,20 @@ SELECT
 FROM 
     proc_monitor_all() p;
 
--- Создаем основную секционированную таблицу
+-- Creating the main partitioned table
 CREATE TABLE proc_activity_snapshots (
 	ts TIMESTAMP DEFAULT NOW(),
     pid INT4,
     datname NAME,
     usename NAME,
-    application_name TEXT COMPRESSION pglz,  -- Сжатие для текстового поля
-    state_q TEXT COMPRESSION pglz,           -- Сжатие для текстового поля
-    query TEXT COMPRESSION pglz,             -- Сжатие для текстового поля
+    application_name TEXT COMPRESSION pglz,  -- Compression for text field
+    state_q TEXT COMPRESSION pglz,           -- Compression for text field
+    query TEXT COMPRESSION pglz,             -- Compression for text field
     res_mb FLOAT4,
     virt_mb FLOAT4,
     swap_mb FLOAT4,
-    command TEXT COMPRESSION pglz,           -- Сжатие для текстового поля
-    state TEXT COMPRESSION pglz,             -- Сжатие для текстового поля
+    command TEXT COMPRESSION pglz,           -- Compression for text field
+    state TEXT COMPRESSION pglz,             -- Compression for text field
     utime FLOAT4,
     stime FLOAT4,
     pcpu FLOAT4,
@@ -178,38 +178,38 @@ CREATE TABLE proc_activity_snapshots (
     voluntary_ctxt_switches INT8,
     nonvoluntary_ctxt_switches INT8,
     threads INT4
-) PARTITION BY RANGE (ts);  -- Секционирование по диапазону дат
--- Создаем дефолтную партицию
+) PARTITION BY RANGE (ts);  -- Partitioning by date range
+-- Creating the default partition
 CREATE TABLE proc_activity_snapshots_default PARTITION OF pgsyswatch.proc_activity_snapshots
 DEFAULT;
 
--- Создаем функцию
+-- Creating the function as manager partitions
 CREATE OR REPLACE FUNCTION manage_partitions_maintenance()
 RETURNS INT4
 LANGUAGE plpgsql
 VOLATILE
 AS $$
 DECLARE
-    curr_day DATE := CURRENT_DATE;  -- Текущая дата
-    next_day DATE := curr_day + INTERVAL '1 day';  -- Следующий день
-    partition_name_curr TEXT := 'proc_activity_snapshots_' || TO_CHAR(curr_day, 'YYYYMMDD');  -- Имя партиции для текущего дня
-    partition_name_next TEXT := 'proc_activity_snapshots_' || TO_CHAR(next_day, 'YYYYMMDD');  -- Имя партиции для следующего дня
-    partition_start_curr TEXT := TO_CHAR(curr_day, 'YYYY-MM-DD');  -- Начало текущей партиции
-    partition_end_curr TEXT := TO_CHAR(curr_day + INTERVAL '1 day', 'YYYY-MM-DD');  -- Конец текущей партиции
-    partition_start_next TEXT := TO_CHAR(next_day, 'YYYY-MM-DD');  -- Начало следующей партиции
-    partition_end_next TEXT := TO_CHAR(next_day + INTERVAL '1 day', 'YYYY-MM-DD');  -- Конец следующей партиции
-    oldest_allowed DATE := CURRENT_DATE - INTERVAL '3 day';  -- Самая старая допустимая партиция (3 дня для тестирования)
-    existing_partition TEXT;  -- Переменная для хранения имени существующей партиции
+    curr_day DATE := CURRENT_DATE;   -- Current date
+    next_day DATE := curr_day + INTERVAL '1 day';  -- Next day
+    partition_name_curr TEXT := 'proc_activity_snapshots_' || TO_CHAR(curr_day, 'YYYYMMDD');  -- Partition name for the current day
+    partition_name_next TEXT := 'proc_activity_snapshots_' || TO_CHAR(next_day, 'YYYYMMDD');  -- Partition name for the next day
+    partition_start_curr TEXT := TO_CHAR(curr_day, 'YYYY-MM-DD');  -- Start of the current partition
+    partition_end_curr TEXT := TO_CHAR(curr_day + INTERVAL '1 day', 'YYYY-MM-DD');  -- End of the current partition
+    partition_start_next TEXT := TO_CHAR(next_day, 'YYYY-MM-DD');  -- Start of the next partition
+    partition_end_next TEXT := TO_CHAR(next_day + INTERVAL '1 day', 'YYYY-MM-DD');  -- End of the next partition
+    oldest_allowed DATE := CURRENT_DATE - INTERVAL '3 day';  -- Oldest allowed partition (3 days for testing)
+    existing_partition TEXT;  -- Variable to store the name of an existing partition
 BEGIN
     SET client_min_messages TO WARNING;
 
-    -- Отладочная информация: вывод текущих значений переменных
+    -- Debug information: output current variable values
     RAISE NOTICE 'curr_day: %, next_day: %, partition_name_curr: %, partition_name_next: %',
         curr_day, next_day, partition_name_curr, partition_name_next;
     RAISE NOTICE 'partition_start_curr: %, partition_end_curr: %, partition_start_next: %, partition_end_next: %',
         partition_start_curr, partition_end_curr, partition_start_next, partition_end_next;
 
-    -- Проверяем, существует ли партиция для текущего дня
+    -- Checking if the partition for the current day exists
     SELECT child.relname INTO existing_partition
     FROM pg_inherits
     JOIN pg_class parent ON pg_inherits.inhparent = parent.oid
@@ -217,7 +217,7 @@ BEGIN
     WHERE parent.relname = 'proc_activity_snapshots'
       AND child.relname = partition_name_curr;
 
-    -- Если партиция для текущего дня не существует, создаем её
+    -- If the partition for the current day does not exist, create it
     IF existing_partition IS NULL THEN
         RAISE NOTICE 'Creating partition for current day: %', partition_name_curr;
         EXECUTE format('
@@ -229,7 +229,7 @@ BEGIN
         RAISE NOTICE 'Partition % already exists, skipping creation.', partition_name_curr;
     END IF;
 
-    -- Проверяем, существует ли партиция для следующего дня
+    -- Check if the partition for the next day exists
     SELECT child.relname INTO existing_partition
     FROM pg_inherits
     JOIN pg_class parent ON pg_inherits.inhparent = parent.oid
@@ -237,7 +237,7 @@ BEGIN
     WHERE parent.relname = 'proc_activity_snapshots'
       AND child.relname = partition_name_next;
 
-    -- Если партиция для следующего дня не существует, создаем её
+    -- If the partition for the next day does not exist, create it
     IF existing_partition IS NULL THEN
         RAISE NOTICE 'Creating partition for next day: %', partition_name_next;
         EXECUTE format('
@@ -249,7 +249,7 @@ BEGIN
         RAISE NOTICE 'Partition % already exists, skipping creation.', partition_name_next;
     END IF;
 
-    -- Удаляем старые партиции, которые выходят за пределы периода хранения
+    -- Delete old partitions older than the allowed period
     FOR existing_partition IN
         SELECT child.relname
         FROM pg_inherits
@@ -259,9 +259,9 @@ BEGIN
           AND child.relname <> 'proc_activity_snapshots_default'
     LOOP
         BEGIN
-            -- Проверяем, что имя партиции соответствует формату даты
+            -- Check that the partition name matches the date format
             IF existing_partition ~ '^proc_activity_snapshots_\d{8}$' THEN
-                -- Извлекаем дату из имени партиции
+                -- Extract date from partition name
                 IF TO_DATE(SUBSTRING(existing_partition FROM '\d{8}$'), 'YYYYMMDD') < oldest_allowed THEN
                     EXECUTE format('DROP TABLE pgsyswatch.%I', existing_partition);
                     RAISE NOTICE 'Partition % dropped.', existing_partition;
@@ -269,17 +269,17 @@ BEGIN
             END IF;
         EXCEPTION
             WHEN OTHERS THEN
-                -- Логируем ошибку и продолжаем
+                -- We log the error and continue
                 RAISE NOTICE 'Error processing partition %: %', existing_partition, SQLERRM;
         END;
     END LOOP;
 
-    -- Если всё успешно, возвращаем 0
+    -- If everything is successful, we return 0
     RETURN 0;
 
 EXCEPTION
     WHEN OTHERS THEN
-        -- В случае ошибки логируем её
+        -- In case of an error, we log it
         RAISE NOTICE 'Error occurred: %', SQLERRM;
         RETURN -1;
 END;
@@ -303,5 +303,5 @@ SELECT pgsyswatch.manage_partitions_maintenance();
 Author: @sqlmaster (Telegram)
 Version: 1.0.0
 ';
--- Сбрасываем search_path обратно к значению по умолчанию
+-- Reset search_path back to default
 RESET search_path;
