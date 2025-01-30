@@ -198,7 +198,7 @@ DECLARE
     partition_end_curr TEXT := TO_CHAR(curr_day + INTERVAL '1 day', 'YYYY-MM-DD');  -- End of the current partition
     partition_start_next TEXT := TO_CHAR(next_day, 'YYYY-MM-DD');  -- Start of the next partition
     partition_end_next TEXT := TO_CHAR(next_day + INTERVAL '1 day', 'YYYY-MM-DD');  -- End of the next partition
-    oldest_allowed DATE := CURRENT_DATE - INTERVAL '3 day';  -- Oldest allowed partition (3 days for testing)
+    oldest_allowed DATE := CURRENT_DATE - INTERVAL '1 month';  -- Oldest allowed partition (3 days for testing) !!! This change the interval for your history storage depth !!!!!!!!!!!!!!
     existing_partition TEXT;  -- Variable to store the name of an existing partition
 BEGIN
     SET client_min_messages TO WARNING;

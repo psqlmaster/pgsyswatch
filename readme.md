@@ -12,7 +12,7 @@
 - **System Load** 📈: Access system load average information.
 - **CPU Frequency** ⏱️: Monitor CPU frequency for all cores.
 - **Historical Data** 🗃️: Store historical process data in partitioned tables.
-
+- **Online binding of the system process** and its consumption by the main metrics to a specific SQL query + history of snapshots once a minute in a partitioned table with automatic creation and deletion of old and new sections
 ---
 
 #### Preview
