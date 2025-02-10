@@ -44,9 +44,10 @@ pgstart:
 # Testing (optional)
 .PHONY: test
 test:
-	@echo "Please wait 2 seconds while start postgresql..."
-	sleep 2 # if an error has been detected, add seconds.
+	@echo "Please wait 2 seconds while start postgresql &  the extension is being installed..."
+	sleep 2
 	psql -U $(DB_USER) -h $(PGHOST) -p $(PGPORT) -d $(DB_NAME) -c "drop extension if exists pgsyswatch cascade;"
+	sleep 3
 	psql -U $(DB_USER) -h $(PGHOST) -p $(PGPORT) -d $(DB_NAME) -c "create extension pgsyswatch;"
 	psql -U $(DB_USER) -h $(PGHOST) -p $(PGPORT) -d $(DB_NAME) -c "SELECT * FROM pgsyswatch.proc_activity_snapshots;"
 	psql -U $(DB_USER) -h $(PGHOST) -p $(PGPORT) -d $(DB_NAME) -c "SELECT * FROM pgsyswatch.pg_proc_activity;"

@@ -1,12 +1,12 @@
-// SPDX-License-Identifier: Apache-2.0
-// Copyright 2025 Alexander Scheglov
+/* SPDX-License-Identifier: Apache-2.0
+Copyright 2025 Alexander Scheglov */
 #include "pgsyswatch_common.h"
 
-// Function to calculate CPU usage percentage
+/* Function to calculate CPU usage percentage */
 float calculate_cpu_usage(unsigned long long utime, unsigned long long stime, unsigned long long starttime, unsigned long long uptime) {
-    // Total CPU time used by the process (in ticks)
+    /* Total CPU time used by the process (in ticks) */
     unsigned long long total_time = utime + stime;
-    // Process uptime in seconds
+    /* Process uptime in seconds */
     float seconds_since_start = (float)(uptime - starttime) / sysconf(_SC_CLK_TCK);
     // Calculate CPU usage percentage
     if (seconds_since_start > 0) {
@@ -15,7 +15,7 @@ float calculate_cpu_usage(unsigned long long utime, unsigned long long stime, un
     return 0.0;
 }
 
-// Function to retrieve process information
+/* Function to retrieve process information */
 ProcessInfo get_process_info(int pid) {
     ProcessInfo process;
     char path[256];
@@ -25,10 +25,10 @@ ProcessInfo get_process_info(int pid) {
     unsigned long long starttime = 0;
     unsigned long long uptime = 0;
 
-    // Initialize the structure
+    /* Initialize the structure */
     process.pid = pid;
     process.command = NULL;
-    process.state = '\0';  // Initialize state
+    process.state = '\0';  
     process.res_mb = 0.0;
     process.virt_mb = 0.0;
     process.swap_mb = 0.0;
@@ -41,19 +41,19 @@ ProcessInfo get_process_info(int pid) {
     process.nonvoluntary_ctxt_switches = 0;
     process.threads = 0;
 
-    // Read CPU information from /proc/[pid]/stat
+    /* Read CPU information from /proc/[pid]/stat */
     snprintf(path, sizeof(path), "/proc/%d/stat", pid);
     file = fopen(path, "r");
     if (file != NULL) {
-        // Format: pid, comm, state, ppid, ..., utime, stime, ..., nice, ...
+        /* Format: pid, comm, state, ppid, ..., utime, stime, ..., nice, ... */
         if (fscanf(file, "%*d %*s %c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %llu %llu %*d %*d %*d %*d %*d %*d %llu",
                    &process.state, &process.utime, &process.stime, &starttime) == 4) {
-            // Successfully parsed /proc/[pid]/stat
+            /* Successfully parsed /proc/[pid]/stat */
         }
         fclose(file);
     }
 
-    // Read uptime from /proc/uptime
+    /* Read uptime from /proc/uptime */
     file = fopen("/proc/uptime", "r");
     if (file != NULL) {
         if (fscanf(file, "%llu", &uptime) == 1) {
@@ -62,10 +62,10 @@ ProcessInfo get_process_info(int pid) {
         fclose(file);
     }
 
-    // Calculate CPU usage
+    /* Calculate CPU usage */
     process.cpu_usage = calculate_cpu_usage(process.utime, process.stime, starttime, uptime);
 
-    // Read memory information from /proc/[pid]/status
+    /* Read memory information from /proc/[pid]/status */
     snprintf(path, sizeof(path), "/proc/%d/status", pid);
     file = fopen(path, "r");
     if (file != NULL) {
@@ -84,40 +84,40 @@ ProcessInfo get_process_info(int pid) {
                 }
             } else if (strncmp(line, "voluntary_ctxt_switches", 23) == 0) {
                 if (sscanf(line, "voluntary_ctxt_switches: %d", &process.voluntary_ctxt_switches) == 1) {
-                    // Successfully parsed voluntary context switches
+                    /* Successfully parsed voluntary context switches */
                 }
             } else if (strncmp(line, "nonvoluntary_ctxt_switches", 26) == 0) {
                 if (sscanf(line, "nonvoluntary_ctxt_switches: %d", &process.nonvoluntary_ctxt_switches) == 1) {
-                    // Successfully parsed non-voluntary context switches
+                    /* Successfully parsed non-voluntary context switches */
                 }
             } else if (strncmp(line, "Threads", 7) == 0) {
                 if (sscanf(line, "Threads: %d", &process.threads) == 1) {
-                    // Successfully parsed thread count
+                    /* Successfully parsed thread count */
                 }
             }
         }
         fclose(file);
     }
 
-    // Read disk I/O information from /proc/[pid]/io
+    /* Read disk I/O information from /proc/[pid]/io */
     snprintf(path, sizeof(path), "/proc/%d/io", pid);
     file = fopen(path, "r");
     if (file != NULL) {
         while (fgets(line, sizeof(line), file)) {
             if (strncmp(line, "read_bytes", 10) == 0) {
                 if (sscanf(line, "read_bytes: %lu", &process.read_bytes) == 1) {
-                    // Successfully parsed read bytes
+                    /* Successfully parsed read bytes */
                 }
             } else if (strncmp(line, "write_bytes", 11) == 0) {
                 if (sscanf(line, "write_bytes: %lu", &process.write_bytes) == 1) {
-                    // Successfully parsed write bytes
+                    /* Successfully parsed write bytes */
                 }
             }
         }
         fclose(file);
     }
 
-    // Read command from /proc/[pid]/cmdline
+    /* Read command from /proc/[pid]/cmdline */
     snprintf(path, sizeof(path), "/proc/%d/cmdline", pid);
     file = fopen(path, "r");
     if (file != NULL) {

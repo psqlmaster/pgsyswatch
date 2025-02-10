@@ -1,6 +1,6 @@
-// src/pgsyswatch_all.c
-// SPDX-License-Identifier: Apache-2.0
-// Copyright 2025 Alexander Scheglov
+/* src/pgsyswatch_all.c
+SPDX-License-Identifier: Apache-2.0
+Copyright 2025 Alexander Scheglov */
 #include "postgres.h"
 #include "fmgr.h"
 #include "utils/elog.h"
@@ -8,18 +8,18 @@
 #include "access/htup.h"
 #include "catalog/pg_type.h"
 #include "utils/builtins.h"
-#include "funcapi.h"        // For SRF (Set-Returning Functions) support
-#include "executor/spi.h"   // For working with tuples
+#include "funcapi.h" 
+#include "executor/spi.h" 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
 #include <sys/time.h>
-#include <unistd.h>         // For sysconf
+#include <unistd.h>      
 
 #include "pgsyswatch_common.h"
 
-// Function to retrieve information about all processes
+/* Function to retrieve information about all processes */
 PG_FUNCTION_INFO_V1(proc_monitor_all);
 
 Datum proc_monitor_all(PG_FUNCTION_ARGS)
@@ -34,7 +34,7 @@ Datum proc_monitor_all(PG_FUNCTION_ARGS)
         funcctx = SRF_FIRSTCALL_INIT();
         oldcontext = MemoryContextSwitchTo(funcctx->multi_call_memory_ctx);
 
-        // Define the structure of the returned columns
+        /* Define the structure of the returned columns */
         tupdesc = CreateTemplateTupleDesc(14); 
         TupleDescInitEntry(tupdesc, (AttrNumber) 1, "pid", INT4OID, -1, 0);
         TupleDescInitEntry(tupdesc, (AttrNumber) 2, "res_mb", FLOAT4OID, -1, 0);
@@ -51,11 +51,11 @@ Datum proc_monitor_all(PG_FUNCTION_ARGS)
         TupleDescInitEntry(tupdesc, (AttrNumber) 13, "nonvoluntary_ctxt_switches", INT4OID, -1, 0);
         TupleDescInitEntry(tupdesc, (AttrNumber) 14, "threads", INT4OID, -1, 0);
 
-        // Initialize metadata for string conversion
+        /* Initialize metadata for string conversion */
         attinmeta = TupleDescGetAttInMetadata(tupdesc);
         funcctx->attinmeta = attinmeta;
 
-        // Scan the /proc directory and collect information about all processes
+        /* Scan the /proc directory and collect information about all processes */
         DIR *dir;
         struct dirent *ent;
         dir = opendir("/proc");
@@ -65,17 +65,17 @@ Datum proc_monitor_all(PG_FUNCTION_ARGS)
                      errmsg("could not open directory /proc")));
         }
 
-        // List to store process information
+        /* List to store process information */
         List *processes = NIL;
 
         while ((ent = readdir(dir)) != NULL) {
             if (ent->d_type == DT_DIR && atoi(ent->d_name) > 0) {
                 int pid = atoi(ent->d_name);
 
-                // Retrieve process information
+                /* Retrieve process information */
                 ProcessInfo process = get_process_info(pid);
 
-                // Store process information
+                /* Store process information */
                 Datum values[14];
                 bool nulls[14] = {false};
 
@@ -98,12 +98,12 @@ Datum proc_monitor_all(PG_FUNCTION_ARGS)
                 values[12] = Int32GetDatum(process.nonvoluntary_ctxt_switches);
                 values[13] = Int32GetDatum(process.threads);
 
-                // Free memory allocated for the command string
+                /* Free memory allocated for the command string */
                 if (process.command != NULL) {
                     free(process.command);
                 }
 
-                // Create a tuple and add it to the list
+                /* Create a tuple and add it to the list */
                 HeapTuple tuple = heap_form_tuple(tupdesc, values, nulls);
                 processes = lappend(processes, tuple);
             }
@@ -111,7 +111,7 @@ Datum proc_monitor_all(PG_FUNCTION_ARGS)
 
         closedir(dir);
 
-        // Save the list of processes in user_fctx
+        /* Save the list of processes in user_fctx */
         funcctx->user_fctx = processes;
         MemoryContextSwitchTo(oldcontext);
     }
@@ -119,7 +119,7 @@ Datum proc_monitor_all(PG_FUNCTION_ARGS)
     funcctx = SRF_PERCALL_SETUP();
     List *processes = (List *) funcctx->user_fctx;
 
-    // Return processes one by one
+    /* Return processes one by one */
     if (list_length(processes) > 0) {
         HeapTuple tuple = (HeapTuple) linitial(processes);
         processes = list_delete_first(processes);
