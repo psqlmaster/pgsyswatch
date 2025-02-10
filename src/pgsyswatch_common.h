@@ -20,17 +20,6 @@ Copyright 2025 Alexander Scheglov */
 #include <sys/time.h>
 #include <unistd.h>
 
-/* Declare the debug_enabled variable as extern */
-extern bool debug_enabled;
-
-/* Macro for printing debug messages */
-#define DEBUG_PRINT(...) \
-    do { \
-        if (debug_enabled) { \
-            fprintf(stderr, __VA_ARGS__); \
-        } \
-    } while (0)
-
 /* Define a structure to store process information */
 typedef struct {
     int pid;                        /* Process ID */

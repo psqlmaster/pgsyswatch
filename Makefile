@@ -45,7 +45,7 @@ pgstart:
 .PHONY: test
 test:
 	@echo "Please wait 2 seconds while start postgresql &  the extension is being installed..."
-	sleep 2
+	sleep 3
 	psql -U $(DB_USER) -h $(PGHOST) -p $(PGPORT) -d $(DB_NAME) -c "drop extension if exists pgsyswatch cascade;"
 	sleep 3
 	psql -U $(DB_USER) -h $(PGHOST) -p $(PGPORT) -d $(DB_NAME) -c "create extension pgsyswatch;"

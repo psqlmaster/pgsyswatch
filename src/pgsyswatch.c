@@ -1,6 +1,6 @@
-/* src/pgsyswatch.c */
-/* SPDX-License-Identifier: Apache-2.0 */
-/* Copyright 2025 Alexander Scheglov */
+/* src/pgsyswatch.c
+SPDX-License-Identifier: Apache-2.0
+Copyright 2025 Alexander Scheglov */
 #include "postgres.h"
 #include "fmgr.h"
 #include "utils/elog.h"
@@ -15,7 +15,7 @@
 #include <string.h>
 #include <dirent.h>
 #include <sys/time.h>
-#include <unistd.h>         // For sysconf
+#include <unistd.h>         /* For sysconf */
 
 #include "pgsyswatch_common.h" 
 #include "system_info.h" 

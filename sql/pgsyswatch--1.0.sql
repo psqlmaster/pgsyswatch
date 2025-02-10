@@ -303,7 +303,6 @@ SELECT pgsyswatch.manage_partitions_maintenance();
 Author: @sqlmaster (Telegram)
 Version: 1.0.0
 ';
-
 CREATE TYPE pgsyswatch.net_monitor_type AS (
     face TEXT,               -- Network interface name
     receive_bytes BIGINT,    -- Number of received bytes

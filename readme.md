@@ -12,7 +12,9 @@
 - **System Load** 📈: Access system load average information.
 - **CPU Frequency** ⏱️: Monitor CPU frequency for all cores.
 - **Historical Data** 🗃️: Store historical process data in partitioned tables.
-- **Online binding of the system process** and its consumption by the main metrics to a specific SQL query + history of snapshots once a minute in a partitioned table with automatic creation and deletion of old and new sections
+- **Online binding of the system process** and its consumption by the main metrics to a specific SQL query + history of snapshots once a minute in a partitioned table with automatic creation and deletion of old and new sections.
+- **Network Monitoring** 🌐: Retrieve detailed network interface statistics, including received/transmitted bytes, packets, errors, and drops, with support for real-time monitoring and historical data storage.
+
 ---
 
 #### Preview
@@ -89,7 +91,7 @@
 ##### Functions 📋
 
 - **`proc_monitor(pid INTEGER)`** 🔍: Retrieves detailed information about a specific process by its PID.
-- **`proc_monitor_all()`** 🌐: Retrieves detailed information about all running processes.
+- **`proc_monitor_all()`** 🔍: Retrieves detailed information about all running processes.
 
 ```sql
 \x on
@@ -137,10 +139,45 @@ core_id|frequency_mhz|
       6|     4000.008|
       7|     4009.086|
 ```
+- **`pgsyswatch.net_monitor()`** 🌐: Retrieve detailed network interface statistics.
+```sql
+select * from pgsyswatch.net_monitor();
+```
+```
+face  |receive_bytes|receive_packets|receive_errs|receive_drop|transmit_bytes|transmit_packets|transmit_errs|transmit_drop|
+------+-------------+---------------+------------+------------+--------------+----------------+-------------+-------------+
+    lo|    124907471|         449712|           0|           0|     124907471|          449712|            0|            0|
+enp4s0|   1700105660|        5303719|           0|           0|     395151249|         3445988|            0|            0|
+```
+select * from  pgsyswatch.net_and_loadavg;
+select * from  pgsyswatch.net_and_loadavg_snapshots;
 ##### Views 👀
 
 - **`pg_stat_activity_ext`** 📑: Extends `pg_stat_activity` with process monitoring details.
 - **`pg_proc_activity`** 📂: Displays information about all PostgreSQL processes. (Realtime)
+- **`pgsyswatch.net_and_loadavg`** 🌐: Retrieve detailed network interface & loloadavg information
+
+```sql
+select * from  pgsyswatch.net_and_loadavg;
+```
+```
+ts                           |load1|load5|load15|running_processes|total_processes|last_pid|cpu_cores|total_receive_kbytes|total_receive_packets|total_receive_errs|total_receive_drop|total_transmit_kbytes|total_transmit_packets|total_transmit_errs|total_transmit_drop|
+-----------------------------+-----+-----+------+-----------------+---------------+--------+---------+--------------------+---------------------+------------------+------------------+---------------------+----------------------+-------------------+-------------------+
+2025-02-10 20:20:38.980 +0300| 1.57| 1.22|  1.13|                2|           2598|  171210|        8|             1785310|              5758644|                 0|                 0|               510090|               3900680|                  0|                  0|
+```
+- **`net_and_loadavg_snapshots`** : 🕥 history table for pgsyswatch.net_and_loadavg
+```sql
+select * from  pgsyswatch.net_and_loadavg_snapshots;
+```
+```
+ts                     |load1|load5|load15|running_processes|total_processes|last_pid|cpu_cores|total_receive_kbytes|total_receive_packets|total_receive_errs|total_receive_drop|total_transmit_kbytes|total_transmit_packets|total_transmit_errs|total_transmit_drop|
+-----------------------+-----+-----+------+-----------------+---------------+--------+---------+--------------------+---------------------+------------------+------------------+---------------------+----------------------+-------------------+-------------------+
+2025-02-10 20:26:01.386| 0.43| 0.77|  0.95|                1|           2633|  172438|        8|             1793068|              5770176|                 0|                 0|               516675|               3911791|                  0|                  0|
+2025-02-10 20:27:01.579| 0.63| 0.78|  0.94|               25|           2627|  172641|        8|             1795185|              5772381|                 0|                 0|               518581|               3913921|                  0|                  0|
+2025-02-10 20:28:01.776| 0.88| 0.87|  0.96|                1|           2711|  172953|        8|             1800518|              5776927|                 0|                 0|               522104|               3917605|                  0|                  0|
+2025-02-10 20:29:01.971| 1.47| 1.03|  1.01|                2|           2661|  173149|        8|             1801811|              5779111|                 0|                 0|               523082|               3919711|                  0|                  0|
+2025-02-10 20:30:02.132| 1.71| 1.15|  1.05|                1|           2660|  173427|        8|             1802861|              5781427|                 0|                 0|               523445|               3922072|                  0|                  0|
+```
 
 ```sql
 select * from  pgsyswatch.pg_proc_activity;
