@@ -303,5 +303,65 @@ SELECT pgsyswatch.manage_partitions_maintenance();
 Author: @sqlmaster (Telegram)
 Version: 1.0.0
 ';
+
+CREATE TYPE pgsyswatch.net_monitor_type AS (
+    face TEXT,               -- Network interface name
+    receive_bytes BIGINT,    -- Number of received bytes
+    receive_packets BIGINT,  -- Number of received packets
+    receive_errs BIGINT,     -- Number of receive errors
+    receive_drop BIGINT,     -- Number of dropped packets on receive
+    transmit_bytes BIGINT,   -- Number of transmitted bytes
+    transmit_packets BIGINT, -- Number of transmitted packets
+    transmit_errs BIGINT,    -- Number of transmit errors
+    transmit_drop BIGINT     -- Number of dropped packets on transmit
+);
+
+CREATE FUNCTION net_monitor()
+RETURNS SETOF net_monitor_type
+LANGUAGE c
+AS '/usr/local/pgsql/lib/pgsyswatch', 'net_monitor';
+
+CREATE VIEW pgsyswatch.net_and_loadavg AS
+SELECT 
+	NOW() ts,
+    load1, 
+    load5, 
+    load15, 
+    running_processes, 
+    total_processes, 
+    last_pid, 
+    cpu_cores,
+    ROUND(SUM(receive_bytes) / 1024,0) AS total_receive_kbytes,
+    SUM(receive_packets) AS total_receive_packets,
+    SUM(receive_errs) AS total_receive_errs,
+    SUM(receive_drop) AS total_receive_drop,
+    ROUND(SUM(transmit_bytes) / 1024,0) AS total_transmit_kbytes,
+    SUM(transmit_packets) AS total_transmit_packets,
+    SUM(transmit_errs) AS total_transmit_errs,
+    SUM(transmit_drop) AS total_transmit_drop
+FROM pgsyswatch.net_monitor(),
+    pgsyswatch.pg_loadavg()
+GROUP BY 
+    load1, load5, load15, running_processes, total_processes, last_pid, cpu_cores;
+
+CREATE TABLE net_and_loadavg_snapshots (
+    ts TIMESTAMP DEFAULT NOW(), -- Timestamp of the record
+    load1 FLOAT4,               -- Average load over the last 1 minute
+    load5 FLOAT4,               -- Average load over the last 5 minutes
+    load15 FLOAT4,              -- Average load over the last 15 minutes
+    running_processes INT4,     -- Number of currently running processes
+    total_processes INT4,       -- Total number of processes
+    last_pid INT4,              -- ID of the last created process
+    cpu_cores INT4,             -- Number of CPU cores
+    total_receive_kbytes INT8,-- Total amount of received data in KB
+    total_receive_packets INT8, -- Total number of received packets
+    total_receive_errs INT8,    -- Total number of receive errors
+    total_receive_drop INT8,    -- Total number of dropped packets on receive
+    total_transmit_kbytes INT8,-- Total amount of transmitted data in KB
+    total_transmit_packets INT8,-- Total number of transmitted packets
+    total_transmit_errs INT8,   -- Total number of transmit errors
+    total_transmit_drop INT8    -- Total number of dropped packets on transmit
+); 
+
 -- Reset search_path back to default
 RESET search_path;

@@ -1,0 +1,35 @@
+INSERT INTO pgsyswatch.net_and_loadavg_snapshots (
+    load1,
+    load5,
+    load15,
+    running_processes,
+    total_processes,
+    last_pid,
+    cpu_cores,
+    total_receive_kbytes,
+    total_receive_packets,
+    total_receive_errs,
+    total_receive_drop,
+    total_transmit_kbytes,
+    total_transmit_packets,
+    total_transmit_errs,
+    total_transmit_drop
+)
+SELECT 
+    load1,
+    load5,
+    load15,
+    running_processes,
+    total_processes,
+    last_pid,
+    cpu_cores,
+    total_receive_kbytes,
+    total_receive_packets,
+    total_receive_errs,
+    total_receive_drop,
+    total_transmit_kbytes,
+    total_transmit_packets,
+    total_transmit_errs,
+    total_transmit_drop
+FROM 
+    pgsyswatch.net_and_loadavg;
