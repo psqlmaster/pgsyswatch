@@ -245,7 +245,7 @@ Contributions are welcome! Please open an issue or submit a pull request on the 
 #### License 
 
 This project is licensed under the [Apache License, Version 2.0](LICENSE).  
-Copyright © 2025 [Alexander Scheglov](https://t.me/sqlmaster)
+Copyright © 2025 [Alexander Shcheglov](https://t.me/sqlmaster)
 
 ---
 
