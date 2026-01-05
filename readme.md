@@ -1,28 +1,27 @@
-## pgsyswatch 🛠️
+<img src="pgsyswatch.png" alt="Описание изображения" width="200" />
 
-**pgsyswatch** is a PostgreSQL extension designed for monitoring system processes. It provides functions to retrieve detailed information about running processes on the system, such as CPU usage, memory consumption, I/O statistics, and more. 🖥️📊
+**Pgsyswatch** is a PostgreSQL extension designed for monitoring system processes. It provides functions to retrieve detailed information about running processes on the system, such as CPU usage, memory consumption, I/O statistics, and more. 
 
 ---
+#### Features 
 
-#### Features ✨
-
-- **Process Monitoring** 🔍: Retrieve information about processes by PID or all system processes.
-- **Memory Usage** 🧠: Monitor RAM, virtual memory, and swap usage.
-- **CPU & I/O Stats** ⚙️: Gather CPU usage and disk I/O statistics.
-- **System Load** 📈: Access system load average information.
-- **CPU Frequency** ⏱️: Monitor CPU frequency for all cores.
-- **Historical Data** 🗃️: Store historical process data in partitioned tables.
+- **Process Monitoring** : Retrieve information about processes by PID or all system processes.
+- **Memory Usage** : Monitor RAM, virtual memory, and swap usage.
+- **CPU & I/O Stats** : Gather CPU usage and disk I/O statistics.
+- **System Load** : Access system load average information.
+- **CPU Frequency** : Monitor CPU frequency for all cores.
+- **Historical Data** : Store historical process data in partitioned tables.
 - **Online binding of the system process** and its consumption by the main metrics to a specific SQL query + history of snapshots once a minute in a partitioned table with automatic creation and deletion of old and new sections.
-- **Network Monitoring** 🌐: Retrieve detailed network interface statistics, including received/transmitted bytes, packets, errors, and drops, with support for real-time monitoring and historical data storage.
+- **Network Monitoring** : Retrieve detailed network interface statistics, including received/transmitted bytes, packets, errors, and drops, with support for real-time monitoring and historical data storage.
 
 ---
 
 #### Preview
 <img src="example.gif" width=1000 />
 
-### Installation 🚀
+### Installation 
 
-#### Prerequisites 🛠️
+#### Prerequisites 
 
 - GCC or another C compiler
 - PostgreSQL (version 9.6 or higher)
@@ -31,7 +30,7 @@
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/psqlmaster/pgsyswatch.git
+   git clone --depth 1 https://github.com/psqlmaster/pgsyswatch.git
    cd pgsyswatch
    ```
 
@@ -86,12 +85,12 @@
 
 ---
 
-#### Usage 🛠️
+#### Usage 
 
-##### Functions 📋
+##### Functions
 
-- **`proc_monitor(pid INTEGER)`** 🔍: Retrieves detailed information about a specific process by its PID.
-- **`proc_monitor_all()`** 🔍: Retrieves detailed information about all running processes.
+- **`proc_monitor(pid INTEGER)`** : Retrieves detailed information about a specific process by its PID.
+- **`proc_monitor_all()`** : Retrieves detailed information about all running processes.
 
 ```sql
 \x on
@@ -113,8 +112,8 @@ select * from pgsyswatch.proc_monitor_all();
 | voluntary_ctxt_switches | 3303 | Number of voluntary context switches |
 | nonvoluntary_ctxt_switches | 379 | Number of involuntary context switches |
 | threads | 1 | Number of threads |
-- **`system_swap_info()`** 🔄: Returns information about system swap usage.
-- **`pg_loadavg()`** 📊: Provides system load average data. (Realtime)
+- **`system_swap_info()`** : Returns information about system swap usage.
+- **`pg_loadavg()`** : Provides system load average data. (Realtime)
 ```sql
 SELECT * FROM pgsyswatch.pg_loadavg();
 ```
@@ -123,7 +122,7 @@ load1|load5|load15|running_processes|total_processes|last_pid|cpu_cores|
 -----+-----+------+-----------------+---------------+--------+---------+
  3.88|  3.8|  3.72|                6|           3305|  291506|        8|
 ```
-- **`cpu_frequencies()`** ⏱️: Returns CPU frequency information for all cores (Realtime trotling monitoring)
+- **`cpu_frequencies()`** : Returns CPU frequency information for all cores (Realtime trotling monitoring)
 ```sql
 select * from pgsyswatch.cpu_frequencies();
 ```
@@ -139,7 +138,7 @@ core_id|frequency_mhz|
       6|     4000.008|
       7|     4009.086|
 ```
-- **`pgsyswatch.net_monitor()`** 🌐: Retrieve detailed network interface statistics.
+- **`pgsyswatch.net_monitor()`** : Retrieve detailed network interface statistics.
 ```sql
 select * from pgsyswatch.net_monitor();
 ```
@@ -153,9 +152,9 @@ select * from  pgsyswatch.net_and_loadavg;
 select * from  pgsyswatch.net_and_loadavg_snapshots;
 ##### Views 👀
 
-- **`pg_stat_activity_ext`** 📑: Extends `pg_stat_activity` with process monitoring details.
-- **`pg_proc_activity`** 📂: Displays information about all PostgreSQL processes. (Realtime)
-- **`pgsyswatch.net_and_loadavg`** 🌐: Retrieve detailed network interface & loloadavg information
+- **`pg_stat_activity_ext`** : Extends `pg_stat_activity` with process monitoring details.
+- **`pg_proc_activity`** : Displays information about all PostgreSQL processes. (Realtime)
+- **`pgsyswatch.net_and_loadavg`** : Retrieve detailed network interface & loloadavg information
 
 ```sql
 select * from  pgsyswatch.net_and_loadavg;
@@ -165,7 +164,7 @@ ts                           |load1|load5|load15|running_processes|total_process
 -----------------------------+-----+-----+------+-----------------+---------------+--------+---------+--------------------+---------------------+------------------+------------------+---------------------+----------------------+-------------------+-------------------+
 2025-02-10 20:20:38.980 +0300| 1.57| 1.22|  1.13|                2|           2598|  171210|        8|             1785310|              5758644|                 0|                 0|               510090|               3900680|                  0|                  0|
 ```
-- **`net_and_loadavg_snapshots`** : 🕥 history table for pgsyswatch.net_and_loadavg
+- **`net_and_loadavg_snapshots`** :  history table for pgsyswatch.net_and_loadavg
 ```sql
 select * from  pgsyswatch.net_and_loadavg_snapshots;
 ```
@@ -190,9 +189,9 @@ pid   |datname|usename|application_name                        |state_q|query   
 182878|testdb |dba    |DBeaver 24.2.3 - Metadata <testdb>      |idle   |SELECT typinput='pg_catalog.array_in'::regproc as is_array, typtype, typname, pg_type.oid   FROM pg_catalog.pg_type   LEFT JOIN (select ns.oid as nspoid, ns.nspname, r.r           from pg_namespace as ns           join ( select s.r, (current_schemas(false|14.816406| 160.4336|    0.0|postgres: dba testdb 127.0.0.1(33182) idle  |S    |    0|    0|        0.0|         0|          0|                     12|                         0|      1|
 182880|testdb |dba    |DBeaver 24.2.3 - SQLEditor <scripts.sql>|active |select * from pgsyswatch.pg_proc_activity where usename~'dba'                                                                                                                                                                                                  |    15.75|161.73828|    0.0|postgres: dba testdb 127.0.0.1(33196) SELECT|R    |   10|    9|  0.3830645|     32768|          0|                     19|                      4182|      1|
 ```
-- **`pg_all_processes`** 🌍: Shows details about all system processes.
+- **`pg_all_processes`** : Shows details about all system processes.
 
-##### Partitioned Tables 🗂️
+##### Partitioned Tables 
 
 The extension includes a partitioned table `proc_activity_snapshots` for storing historical process data (`pgsyswatch.proc_monitor_all() JOIN pg_stat_activity`). Partitions are automatically managed by the `manage_partitions_maintenance()` function.
 
@@ -206,7 +205,7 @@ ts                     |pid   |datname|usename|application_name                 
 2025-01-28 19:33:48.331|222682|testdb |dba    |DBeaver 24.2.3 - Metadata <testdb>      |idle   |SELECT c.relname,a.*,pg_catalog.pg_get_expr(ad.adbin, ad.adrelid, true) as def_value,dsc.description,dep.objid¶FROM pg_catalog.pg_attribute a¶INNER JOIN pg_catalog.pg_class c ON (a.attrelid=c.oid)¶LEFT OUTER JOIN pg_catalog.pg_attrdef ad ON (a.attrelid=ad|14.941406|160.59375|    0.0|postgres: dba testdb 127.0.0.1(48684) idle  |S    |  1.0|  0.0|0.052548602|    618496|          0|                     61|                         2|      1|
 2025-01-28 19:33:48.331|222684|testdb |dba    |DBeaver 24.2.3 - SQLEditor <scripts.sql>|active |--вставляем данные 1 раз в минуту¶INSERT INTO pgsyswatch.proc_activity_snapshots (¶    pid, datname, usename, application_name, state_q, ¶    query, res_mb, virt_mb, swap_mb, command,state, utime, ¶    stime, pcpu, read_bytes, write_bytes, voluntary_ctxt_|16.585938|162.17188|    0.0|postgres: dba testdb 127.0.0.1(48686) INSERT|R    |  1.0|  3.0| 0.21019441|   1654784|          0|                    111|                         3|      1|
 ```
-##### Example: Managing Partitions 🛠️
+##### Example: Managing Partitions
 - Run the following function to create and maintain partitions   
 **(default depth is 1 month, partitions older than this are automatically deleted):**
 ```sql
@@ -221,7 +220,7 @@ pgsyswatch   |proc_activity_snapshots|pgsyswatch      |proc_activity_snapshots_2
 ```
 ---
 
-#### Testing 🧪
+#### Testing 
 
 To test the extension, you can use the `make test` command:
 ```bash
@@ -230,7 +229,7 @@ make test
 make clean && make && make install && make test
 ```
 ---
-#### Cleanup 🧹
+#### Cleanup 
 
 To clean up the build artifacts, run:
 ```bash
@@ -239,18 +238,18 @@ make clean
 ---
 #### Contributing 🤝
 
-Contributions are welcome! Please open an issue or submit a pull request on the [GitHub repository](https://github.com/psqlmaster/pgsyswatch). 🚀
+Contributions are welcome! Please open an issue or submit a pull request on the [GitHub repository](https://github.com/psqlmaster/pgsyswatch). 
 
 ---
 
-#### License 📜
+#### License 
 
 This project is licensed under the [Apache License, Version 2.0](LICENSE).  
 Copyright © 2025 [Alexander Scheglov](https://t.me/sqlmaster)
 
 ---
 
-For more details, refer to the [source code](https://github.com/psqlmaster/pgsyswatch) and the provided SQL scripts. 📚
+For more details, refer to the [source code](https://github.com/psqlmaster/pgsyswatch) and the provided SQL scripts. 
 
 ---
 
