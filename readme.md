@@ -2,6 +2,7 @@
 
 **Pgsyswatch** is a PostgreSQL extension designed for monitoring system processes. It provides functions to retrieve detailed information about running processes on the system, such as CPU usage, memory consumption, I/O statistics, and more. 
 
+- This tool is NOT intended for beginners.  It requires extensive knowledge of PostgreSQL.
 ---
 #### Features 
 
